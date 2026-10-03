@@ -344,27 +344,80 @@ async function fetchList(url) {
   }
 }
 
-let airportsLoaded = false;
+let airports = [];
 async function loadAirports() {
-  if (airportsLoaded) return;
-  const list = await fetchList('/api/ryanair/airports');
-  airportsLoaded = list.length > 0;
-  list.sort((a, b) => a.name.localeCompare(b.name));
-  $('#ryanair-airports').innerHTML = list.map((a) => `<option value="${esc(remember('ryanair', a))}"></option>`).join('');
+  if (airports.length) return;
+  airports = await fetchList('/api/ryanair/airports');
+  airports.forEach((a) => remember('ryanair', a));
 }
 
-let rowSeq = 0;
+// Ryanair airports matching typed text: exact code first, then names starting with it, then names containing it.
+function matchAirports(q) {
+  q = q.toLowerCase();
+  const score = (a) => (a.id.toLowerCase() === q ? 0 : a.name.toLowerCase().startsWith(q) ? 1 : 2);
+  return airports
+    .filter((a) => a.id.toLowerCase() === q || a.name.toLowerCase().includes(q))
+    .sort((a, b) => score(a) - score(b) || a.name.localeCompare(b.name))
+    .slice(0, 8);
+}
+
+// Tappable suggestion list under a place input. Not a <datalist>: Firefox for Android shows no dropdown for those.
+function setupPlacePicker(input, getProvider) {
+  const place = input.parentElement;
+  const list = place.querySelector('.suggest');
+  let items = [];
+  let timer;
+
+  const show = (found) => {
+    items = found;
+    list.innerHTML = items
+      .map((it, i) => `<button type="button" class="option" data-i="${i}">${esc(remember(getProvider(), it))} <span class="muted">${esc(it.country)}</span></button>`)
+      .join('');
+    list.hidden = !items.length;
+  };
+  const pick = (item) => {
+    input.value = remember(getProvider(), item);
+    show([]);
+  };
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (getProvider() === 'ryanair') return show(q ? matchAirports(q) : []);
+    if (q.length < 2) return show([]);
+    timer = setTimeout(async () => {
+      const cities = await fetchList(`/api/flixbus/cities?q=${encodeURIComponent(q)}`);
+      if (input.value.trim() === q) show(cities.slice(0, 8));
+    }, 250);
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && items.length) {
+      e.preventDefault();
+      pick(items[0]);
+    }
+    if (e.key === 'Escape') show([]);
+  });
+  list.addEventListener('click', (e) => {
+    const option = e.target.closest('.option');
+    if (option) pick(items[option.dataset.i]);
+  });
+  // Close when focus leaves the field, after a short delay so a tap on a suggestion still registers.
+  place.addEventListener('focusout', () => setTimeout(() => !place.contains(document.activeElement) && show([]), 150));
+}
+
 function addRouteRow(r = { p: 'flixbus' }) {
   if ($('#routes').children.length >= MAX_ROUTES) return;
-  const n = rowSeq++;
   const row = document.createElement('div');
   row.className = 'route-edit';
   row.innerHTML = `
     <select aria-label="Provider">
       ${Object.entries(PROVIDERS).map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}
     </select>
-    <input name="from" aria-label="From" autocomplete="off">
-    <input name="to" aria-label="To" autocomplete="off">
+    ${['from', 'to'].map((end) => `
+      <div class="place" data-end="${end}">
+        <input name="${end}" aria-label="${end === 'from' ? 'From' : 'To'}" autocomplete="off">
+        <div class="suggest" hidden></div>
+      </div>`).join('')}
     <button type="button" class="icon-btn" aria-label="Remove route" title="Remove route">×</button>
     <label class="check direct"><input type="checkbox" name="direct"${r.direct ? ' checked' : ''}> Direct only</label>
     <div class="bags">
@@ -377,15 +430,12 @@ function addRouteRow(r = { p: 'flixbus' }) {
             <input type="number" name="price" min="0" max="500" step="0.01" placeholder="€ each" aria-label="${t}, price each" value="${r.bags?.[k]?.price ?? ''}">
           </div>
         </fieldset>`).join('')}
-    </div>
-    <datalist id="dl-${n}-from"></datalist>
-    <datalist id="dl-${n}-to"></datalist>`;
+    </div>`;
   const provider = row.querySelector('select');
-  const inputs = [row.querySelector('[name=from]'), row.querySelector('[name=to]')];
+  const inputs = [...row.querySelectorAll('.place input')];
   const update = () => {
     const ryanair = provider.value === 'ryanair';
     inputs.forEach((input) => {
-      input.setAttribute('list', ryanair ? 'ryanair-airports' : `dl-${n}-${input.name}`);
       input.placeholder = `${input.name === 'from' ? 'From' : 'To'} ${ryanair ? 'airport or code' : 'city'}`;
     });
     row.querySelector('.bags').hidden = !ryanair;
@@ -396,7 +446,7 @@ function addRouteRow(r = { p: 'flixbus' }) {
   update();
   for (const input of inputs) {
     if (r[input.name]) input.value = remember(r.p, r[input.name]);
-    input.addEventListener('input', () => suggestCities(provider.value, input, `dl-${n}-${input.name}`));
+    setupPlacePicker(input, () => provider.value);
   }
   provider.addEventListener('change', () => {
     inputs.forEach((input) => (input.value = ''));
@@ -404,20 +454,6 @@ function addRouteRow(r = { p: 'flixbus' }) {
   });
   row.querySelector('.icon-btn').addEventListener('click', () => row.remove());
   $('#routes').append(row);
-}
-
-const timers = new WeakMap();
-function suggestCities(p, input, listId) {
-  if (p !== 'flixbus') return;
-  clearTimeout(timers.get(input));
-  timers.set(input, setTimeout(async () => {
-    const q = input.value.trim();
-    if (q.length < 2 || places.has(`flixbus:${q}`)) return;
-    const cities = await fetchList(`/api/flixbus/cities?q=${encodeURIComponent(q)}`);
-    document.getElementById(listId).innerHTML = cities
-      .map((c) => `<option value="${esc(remember('flixbus', c))}"></option>`)
-      .join('');
-  }, 250));
 }
 
 // ---------- events ----------

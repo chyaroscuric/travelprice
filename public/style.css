@@ -162,8 +162,31 @@ label.check input { width: auto; margin: 0; }
 }
 #routes { margin-top: var(--s3); }
 .route-edit select { grid-area: p; margin: 0; }
-.route-edit [name="from"] { grid-area: from; margin: 0; }
-.route-edit [name="to"] { grid-area: to; margin: 0; }
+.route-edit .place[data-end="from"] { grid-area: from; }
+.route-edit .place[data-end="to"] { grid-area: to; }
+.place { position: relative; }
+.place input { margin: 0; }
+.suggest {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  margin-top: var(--s1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.option {
+  display: block;
+  width: 100%;
+  padding: var(--s2);
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+.option:hover, .option:focus-visible { color: var(--accent); }
 .route-edit .icon-btn { grid-area: x; }
 .route-edit .check { grid-column: 1 / -1; margin: 0 0 var(--s3); }
 .bags {
