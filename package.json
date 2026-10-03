@@ -1,0 +1,9 @@
+{
+  "name": "travelprice",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "deploy": "npx wrangler pages deploy public --project-name travelprice"
+  }
+}

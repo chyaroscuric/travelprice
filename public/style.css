@@ -1,0 +1,189 @@
+/* Design tokens — the only colors, sizes and spacing used in this app. */
+:root {
+  --bg: #ffffff;
+  --text: #1c1c1c;
+  --muted: #6b6b6b;
+  --line: #d9d9d9;
+  --accent: #1d5bd6;
+  --accent-text: #ffffff;
+  --up: #b3261e;
+  --down: #18794e;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-sm: 13px;
+  --fs: 15px;
+  --fs-lg: 20px;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 16px;
+  --s4: 24px;
+  --s5: 40px;
+
+  --radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161616;
+    --text: #ececec;
+    --muted: #9a9a9a;
+    --line: #3a3a3a;
+    --accent: #6b9cff;
+    --accent-text: #0b0b0b;
+    --up: #ff7b72;
+    --down: #4cc38a;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: var(--fs)/1.45 var(--font);
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--s4) var(--s3) var(--s5);
+}
+
+[hidden] { display: none !important; }
+
+h1 { margin: 0; font-size: var(--fs-lg); font-weight: 600; }
+h2 { margin: 0; font-size: var(--fs); font-weight: 600; }
+form h2 { margin-top: var(--s5); }
+p { margin: var(--s2) 0 0; }
+a { color: var(--accent); }
+
+.muted { color: var(--muted); font-size: var(--fs-sm); }
+.up { color: var(--up); }
+.down { color: var(--down); }
+.price { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Prices */
+.route { margin-top: var(--s5); }
+.split {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s3);
+}
+.leg { margin-top: var(--s3); }
+.leg-price { text-align: right; }
+
+details { margin-top: var(--s3); }
+summary { cursor: pointer; color: var(--muted); font-size: var(--fs-sm); }
+table {
+  margin-top: var(--s2);
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+th, td { padding: var(--s1) 0 var(--s1) var(--s4); text-align: right; font-weight: normal; }
+th { color: var(--muted); }
+th:first-child, td:first-child { padding-left: 0; text-align: left; }
+
+/* Actions: primary first, then secondary/tertiary, left-aligned, at the end of the view. */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+  margin-top: var(--s5);
+}
+
+button { font: inherit; cursor: pointer; }
+.btn {
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+}
+.btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.btn:disabled { opacity: 0.6; cursor: default; }
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+}
+.icon-btn {
+  padding: var(--s1) var(--s2);
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: var(--fs-lg);
+  line-height: 1;
+}
+
+/* Settings */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s3);
+  margin-top: var(--s4);
+}
+label { display: block; }
+input, select {
+  display: block;
+  width: 100%;
+  margin-top: var(--s1);
+  padding: var(--s2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+label.check {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-top: var(--s5);
+}
+label.check input { width: auto; margin: 0; }
+
+.route-edit {
+  display: grid;
+  grid-template-columns: 110px 1fr 1fr auto;
+  grid-template-areas: "p from to x";
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+#routes { margin-top: var(--s3); }
+.route-edit select { grid-area: p; margin: 0; }
+.route-edit [name="from"] { grid-area: from; margin: 0; }
+.route-edit [name="to"] { grid-area: to; margin: 0; }
+.route-edit .icon-btn { grid-area: x; }
+.route-edit .check { grid-column: 1 / -1; margin: 0 0 var(--s3); }
+.bags {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+.bags p { grid-column: 1 / -1; margin: 0; }
+.bags fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.bags legend { margin-bottom: var(--s1); padding: 0; }
+.bags .pair { display: grid; grid-template-columns: 64px 1fr; gap: var(--s2); }
+.bags input { margin: 0; }
+
+@media (max-width: 520px) {
+  .route-edit {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "p x" "from from" "to to";
+    margin-bottom: var(--s4);
+  }
+  .bags { grid-template-columns: 1fr; }
+}

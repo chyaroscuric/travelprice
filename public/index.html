@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Travel prices</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main>
+    <section id="prices-view" hidden>
+      <h1>Travel prices</h1>
+      <p class="muted" id="summary"></p>
+      <p class="up" id="alert" hidden></p>
+      <div id="results"></div>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="check">Check now</button>
+        <button type="button" class="link" id="open-settings">Settings</button>
+        <span class="muted" id="status"></span>
+      </div>
+    </section>
+
+    <form id="settings-view" hidden>
+      <h1>Settings</h1>
+      <div class="fields">
+        <label>Outbound <input type="date" name="out" required></label>
+        <label>Return <input type="date" name="ret"></label>
+        <label>Adults <input type="number" name="adults" min="1" max="9" required></label>
+      </div>
+      <p class="muted">Leave return empty for a one-way trip.</p>
+
+      <h2>Routes</h2>
+      <div id="routes"></div>
+      <button type="button" class="btn" id="add-route">Add route</button>
+
+      <label class="check"><input type="checkbox" name="notify"> Notify me when a price goes up (while this tab is open)</label>
+      <p class="muted">Settings and price history are saved in cookies in this browser only.</p>
+
+      <p class="up" id="error" hidden></p>
+      <div class="actions">
+        <button class="btn btn-primary">Save</button>
+        <button type="button" class="link" id="cancel">Cancel</button>
+      </div>
+    </form>
+  </main>
+  <datalist id="ryanair-airports"></datalist>
+</body>
+</html>
