@@ -331,10 +331,23 @@ function resolve(p, text) {
   return null;
 }
 
+// Fetches a suggestion list. On failure it says why instead of leaving the dropdown silently empty.
+async function fetchList(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`server returned ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    $('#error').hidden = false;
+    $('#error').textContent = `Couldn't load suggestions (${err.message}).`;
+    return [];
+  }
+}
+
 let airportsLoaded = false;
 async function loadAirports() {
   if (airportsLoaded) return;
-  const list = await fetch('/api/ryanair/airports').then((r) => (r.ok ? r.json() : [])).catch(() => []);
+  const list = await fetchList('/api/ryanair/airports');
   airportsLoaded = list.length > 0;
   list.sort((a, b) => a.name.localeCompare(b.name));
   $('#ryanair-airports').innerHTML = list.map((a) => `<option value="${esc(remember('ryanair', a))}"></option>`).join('');
@@ -400,7 +413,7 @@ function suggestCities(p, input, listId) {
   timers.set(input, setTimeout(async () => {
     const q = input.value.trim();
     if (q.length < 2 || places.has(`flixbus:${q}`)) return;
-    const cities = await fetch(`/api/flixbus/cities?q=${encodeURIComponent(q)}`).then((r) => (r.ok ? r.json() : [])).catch(() => []);
+    const cities = await fetchList(`/api/flixbus/cities?q=${encodeURIComponent(q)}`);
     document.getElementById(listId).innerHTML = cities
       .map((c) => `<option value="${esc(remember('flixbus', c))}"></option>`)
       .join('');

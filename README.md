@@ -10,11 +10,14 @@ npm run dev
 
 Open http://localhost:8788. Requires Node 18+, with no dependencies to install.
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare
 
-**Git:** push this repo, then in Cloudflare go to Workers & Pages → Create → Pages → Connect to Git. Leave the build command empty and set the build output directory to `public`. The `functions/` folder is picked up automatically.
+It deploys as a Worker with static assets (`wrangler.jsonc` + `worker.js`), which is what Cloudflare's default "Create" flow sets up.
 
-**CLI:** run `npm run deploy` (uses `npx wrangler`; it asks you to log in the first time).
+- **Git:** connect the repo in Workers & Pages. Each push runs `npx wrangler deploy`. The `name` in `wrangler.jsonc` must match the Worker's name in the dashboard.
+- **CLI:** run `npm run deploy` (it asks you to log in the first time).
+
+It also works as a Pages project: build output directory `public`, with `functions/` picked up automatically.
 
 ## How the daily check works
 

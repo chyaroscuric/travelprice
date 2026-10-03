@@ -1,0 +1,10 @@
+{
+  // Must match the Worker's name in the Cloudflare dashboard.
+  "name": "travelprice",
+  "main": "worker.js",
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS"
+  }
+}

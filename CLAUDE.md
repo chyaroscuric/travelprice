@@ -1,11 +1,12 @@
 # Travel price checker
 
-Compares FlixBus and Ryanair prices for a trip and re-checks them once a day. Deployed on Cloudflare Pages.
+Compares FlixBus and Ryanair prices for a trip and re-checks them once a day. Deployed on Cloudflare as a Worker with static assets (the Pages layout also works).
 
 ## Layout
 
 - `public/`: static UI (`index.html`, `style.css`, `app.js`). No framework, no build step.
 - `functions/api/[[path]].js`: one Pages Function that proxies the FlixBus and Ryanair APIs (browsers can't call them directly because of CORS). It is stateless.
+- `worker.js` + `wrangler.jsonc`: entry point when deployed as a Worker with static assets (the live setup). It sends `/api/*` to the same function. A Worker deploy ignores `functions/` unless the file is imported here.
 - `server.js`: zero-dependency local dev server that serves `public/` and runs the same function. Start it with `npm run dev` (http://localhost:8788).
 
 ## Privacy rule
